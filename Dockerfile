@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy JAR file into the container
-COPY target/gcp-0.0.1-SNAPSHOT.jar gcp-0.0.1-SNAPSHOT.jar
+COPY gcp/target/gcp-0.0.1-SNAPSHOT.jar gcp-0.0.1-SNAPSHOT.jar
 
 # Expose the port the application runs on
 EXPOSE 8080
