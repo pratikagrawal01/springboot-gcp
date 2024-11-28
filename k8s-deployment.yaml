@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gcp-0.0.1-SNAPSHOT
+  name: my-spring-boot-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: gcp-0.0.1-SNAPSHOT
+      app: my-spring-boot-app
   template:
     metadata:
       labels:
-        app: gcp-0.0.1-SNAPSHOT
+        app: my-spring-boot-app
     spec:
       containers:
-        - name: gcp-0.0.1-SNAPSHOT
-          image: gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT:latest
+        - name: my-spring-boot-app
+          image: gcr.io/$PROJECT_ID/my-spring-boot-app:latest
           ports:
             - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gcp-0.0.1-SNAPSHOT
+  name: my-spring-boot-app
 spec:
   type: LoadBalancer
   selector:
-    app: gcp-0.0.1-SNAPSHOT
+    app: my-spring-boot-app
   ports:
     - protocol: TCP
       port: 80

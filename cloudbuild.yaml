@@ -1,21 +1,21 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-spring-boot-app', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT']
+    args: ['push', 'gcr.io/$PROJECT_ID/my-spring-boot-app']
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         gcloud container clusters get-credentials my-cluster \
-          --zone us-west1 \
+          --zone us-west1-b \
           --project $PROJECT_ID
   - name: 'gcr.io/cloud-builders/kubectl'
     args: ['apply', '-f', 'k8s-deployment.yaml']
 
 images:
-  - 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT'
+  - 'gcr.io/$PROJECT_ID/my-spring-boot-app'
 
 options:
   logging: CLOUD_LOGGING_ONLY

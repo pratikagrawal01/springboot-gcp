@@ -1,14 +1,14 @@
-# Use Java 17 JDK as base image
+# Use a lightweight Java 17 runtime image
 FROM openjdk:17-jdk-slim
 
-# Set application work directory
+# Set the working directory
 WORKDIR /app
 
-# Copy JAR file into the container
-COPY gcp/target/gcp-0.0.1-SNAPSHOT.jar gcp-0.0.1-SNAPSHOT.jar
+# Copy the Spring Boot JAR file
+COPY gcp/target/my-spring-boot-app.jar my-spring-boot-app.jar
 
-# Expose the port the application runs on
+# Expose the port your application runs on
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "gcp-0.0.1-SNAPSHOT.jar"]
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "my-spring-boot-app.jar"]
