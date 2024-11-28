@@ -1,0 +1,21 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials my-cluster \
+          --zone us-central1-a \
+          --project $PROJECT_ID
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['apply', '-f', 'k8s-deployment.yaml']
+
+images:
+  - 'gcr.io/$PROJECT_ID/gcp-0.0.1-SNAPSHOT'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
