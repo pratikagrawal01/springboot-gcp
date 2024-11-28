@@ -9,7 +9,7 @@ steps:
       - '-c'
       - |
         gcloud container clusters get-credentials my-cluster \
-          --zone us-central1-a \
+          --zone us-west1 \
           --project $PROJECT_ID
   - name: 'gcr.io/cloud-builders/kubectl'
     args: ['apply', '-f', 'k8s-deployment.yaml']
