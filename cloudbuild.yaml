@@ -1,21 +1,18 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/my-spring-boot-app', '.']
+    args: ['build', '-t', 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest', '--build-arg=JAR_FILE=my-spring-boot-app.jar','.']
+    id: 'Build Docker Image'
+    
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/my-spring-boot-app']
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
+    args: ['push', 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest']
+    id: 'Push Docker Image'
+    
+  - name: 'google/cloud-sdk:latest'
+    entrypoint: 'sh'
     args:
+      - 'xe'
       - '-c'
       - |
-        gcloud container clusters get-credentials my-cluster \
-          --zone us-west1-b \
-          --project $PROJECT_ID
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args: ['apply', '-f', 'k8s-deployment.yaml']
-
-images:
-  - 'gcr.io/$PROJECT_ID/my-spring-boot-app'
-
+        gcloud deploy releases create 'app-release-${SHORT_SHA}' --delivery-pipeline=gcp-bf-springboot-deploy-pipeline  --region=us-central1 --from-k8s-manifest=./deployment.yaml
 options:
   logging: CLOUD_LOGGING_ONLY
