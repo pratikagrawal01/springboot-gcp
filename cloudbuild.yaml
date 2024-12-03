@@ -21,7 +21,7 @@ steps:
   args:
     - 'set'
     - 'image'
-    - 'deployment/spring-boot-deployment'
+    - 'deployment/deployment-1'
     - 'spring-boot-container=gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1' 
