@@ -65,7 +65,7 @@ public class GcpFileStorageServiceImpl implements GcpFileStorageService,CommonCo
 				logger.error("Could not convert the file content of file {} to JsonNode : ",fileName);
 			}
 		} catch (Exception e) {
-			logger.error("Could not Connect to gcp : ");
+			logger.error("Could not Connect to gcp : {}" ,e);
 		}
 		return null;
 	}
