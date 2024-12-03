@@ -17,11 +17,13 @@ steps:
     - 'push'
     - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
 
+# Deploy to Kubernetes
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
-    - 'set'
-    - 'image'
-    - 'deployment/deployment-1'
+      - 'apply'
+      - '-f'
+      - 'deployment.yaml'
+      
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1' 
     - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
