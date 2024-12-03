@@ -17,12 +17,7 @@ steps:
     - 'push'
     - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
 
-# Deploy to Kubernetes
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'set'
-    - 'image'
-    - 'deployment/deployment-1'
+# Deploy to Kubernetes    
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
       - 'rollout'
