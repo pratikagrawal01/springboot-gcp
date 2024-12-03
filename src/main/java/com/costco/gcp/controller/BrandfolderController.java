@@ -37,7 +37,7 @@ public class BrandfolderController {
 	
 	@GetMapping({ "/hi/{name}"}) 
 	public ResponseEntity<String> test (@PathVariable String name) {
-		pubSubMessageService.pullMessages();
+		//pubSubMessageService.pullMessages();
 		//	brandfolderRepository.save(new Brandfolder(UUID.randomUUID().toString(),testJson));
 		return ResponseEntity.ok("HI "+name);
 	}

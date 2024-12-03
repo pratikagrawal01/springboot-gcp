@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.costco</groupId>
-	<artifactId>gcp</artifactId>
+	<artifactId>gcp-springboot-repo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>gcp</name>
+	<name>gcp-springboot-repo</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

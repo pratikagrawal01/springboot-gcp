@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the Spring Boot JAR file
-COPY gcp/target/my-spring-boot-app.jar my-spring-boot-app.jar
+COPY target/my-spring-boot-app.jar my-spring-boot-app.jar
 
 # Expose the port your application runs on
 EXPOSE 8080
