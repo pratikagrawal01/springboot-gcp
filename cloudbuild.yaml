@@ -20,9 +20,8 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
     - 'set'
-    - 'image'
+    - 'image=gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
     - 'deployment/deployment-1'
-    - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1' 
     - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
