@@ -23,8 +23,3 @@ steps:
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a' 
     - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
-
-# Specify the required service account for Cloud Build
-options:
-  serviceAccount: 'bf-cloud-sa@primordial-veld-442819-k2.iam.gserviceaccount.com'
-  logging: CLOUD_LOGGING_ONLY
