@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-spring-boot-app
+  name: deployment-1
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: my-spring-boot-app
+      app: deployment-1
   template:
     metadata:
       labels:
-        app: my-spring-boot-app
+        app: deployment-1
     spec:
       containers:
       - name: spring-boot-container
