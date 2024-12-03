@@ -12,7 +12,7 @@ spec:
       labels:
         app: deployment-1
     spec:
-      serviceAccountName: bf-cloud-sa 
+      serviceAccountName: bf-cloud-sa@primordial-veld-442819-k2.iam.gserviceaccount.com
       containers:
       - name: spring-boot-container
         image: gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest
