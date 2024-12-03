@@ -9,10 +9,9 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'gcr.io/$PROJECT_ID/my-spring-boot-app:latest'
+    - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
     - '.'
 
-# Step 2: Push the Docker image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
   args:
     - 'push'
