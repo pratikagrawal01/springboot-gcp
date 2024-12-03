@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-container
-        image: gcr.io/primordial-veld-442819-k2/my-spring-boot-app:$COMMIT_SHA
+        image: gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest
         ports:
         - containerPort: 8080
