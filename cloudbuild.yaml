@@ -1,18 +1,30 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest', '--build-arg=JAR_FILE=my-spring-boot-app.jar','.']
-    id: 'Build Docker Image'
-    
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest']
-    id: 'Push Docker Image'
-    
-  - name: 'google/cloud-sdk:latest'
-    entrypoint: 'sh'
-    args:
-      - 'xe'
-      - '-c'
-      - |
-        gcloud deploy releases create 'app-release-${SHORT_SHA}' --delivery-pipeline=gcp-bf-springboot-deploy-pipeline  --region=us-central1 --from-k8s-manifest=./deployment.yaml
+# Step 1: Build the Docker image
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'build'
+    - '-t'
+    - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
+    - '.'
+
+# Step 2: Push the Docker image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'push'
+    - 'gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
+
+# Step 3: Deploy to GKE
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+    - 'set'
+    - 'image'
+    - 'deployment/spring-boot-deployment'
+    - 'spring-boot-container=gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest'
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a' 
+    - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
+
+# Specify the required service account for Cloud Build
 options:
+  serviceAccount: 'bf-cloud-sa@primordial-veld-442819-k2.iam.gserviceaccount.com'
   logging: CLOUD_LOGGING_ONLY
