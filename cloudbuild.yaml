@@ -20,10 +20,14 @@ steps:
 # Deploy to Kubernetes
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
-      - 'apply'
-      - '-f'
-      - 'deployment.yaml'
-      
+    - 'set'
+    - 'image'
+    - 'deployment/deployment-1'
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+      - 'rollout'
+      - 'restart'
+      - 'deployment/deployment-1'
   env:
     - 'CLOUDSDK_COMPUTE_ZONE=us-central1' 
     - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
