@@ -12,7 +12,6 @@ spec:
       labels:
         app: deployment-1
     spec:
-      serviceAccountName: bf-cloud-sa
       containers:
       - name: spring-boot-container
         image: gcr.io/primordial-veld-442819-k2/my-spring-boot-app:latest
