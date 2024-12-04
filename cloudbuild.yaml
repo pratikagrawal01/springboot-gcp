@@ -1,5 +1,5 @@
 steps:
-- name: 'maven:3.8.7-eclipse-temurin-17-alpine'
+- name: 'maven:3.8.5-openjdk-17'
   id: 'Build JAR'
   entrypoint: 'mvn'
   args: ['clean', 'package', '-DskipTests']
