@@ -1,4 +1,4 @@
-package com.costco.gcp.pubsub.listener;
+package com.costco.gcp.pubsub.service;
 
 import java.util.Collection;
 
@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.costco.gcp.constants.CommonConstants;
-import com.costco.gcp.pubsub.service.BrandfolderAssetSyncService;
+import com.costco.gcp.service.BrandfolderAssetSyncService;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.AcknowledgeablePubsubMessage;
 
 @Service
-public class PubSubMessageListenerImpl implements PubSubMessageListener,CommonConstants {
+public class PubSubMessageListenerServiceImpl implements PubSubMessageListenerService,CommonConstants {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 

@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.costco.gcp.model.webhook.WebHook;
-import com.costco.gcp.pubsub.listener.PubSubMessageListener;
+import com.costco.gcp.pubsub.service.PubSubMessageListenerService;
+import com.costco.gcp.pubsub.service.PubSubMessagePublish;
 import com.costco.gcp.service.BrandfolderService;
 import com.costco.gcp.service.GcpApiService;
 import com.costco.gcp.service.GcpFileStorageService;
@@ -20,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class BrandfolderController {
-	
+
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
@@ -28,13 +31,16 @@ public class BrandfolderController {
 
 	@Autowired
 	GcpApiService gcpApiService;
-	
-	@Autowired
-	PubSubMessageListener pubSubMessageService;
 
 	@Autowired
-	GcpFileStorageService gcpFileStorageService;
+	PubSubMessageListenerService pubSubMessageService;
+
+	@Autowired 
+	PubSubMessagePublish pubSubMessagePublish;
 	
+	@Autowired
+	GcpFileStorageService gcpFileStorageService;
+
 	@GetMapping({ "/hi/{name}"}) 
 	public ResponseEntity<String> test (@PathVariable String name) {
 		//pubSubMessageService.pullMessages();
@@ -61,7 +67,22 @@ public class BrandfolderController {
 		}
 		return ResponseEntity.ok("Message received");
 	}
-	
+
+	@PostMapping({"/publish"})
+	public ResponseEntity<String> publish(@RequestBody String requestBody) throws JsonMappingException, JsonProcessingException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			logger.info("Webhook received :");
+			WebHook webHookData = objectMapper.readValue(requestBody, WebHook.class);
+			logger.info("webHook id {} asset {}",webHookData.data().webhookId(),webHookData.data().attributes().bfKey());
+		}catch(Exception ex) {
+			logger.error("Incorrect webhook payload : {}", requestBody);
+			return ResponseEntity.badRequest().body("Incorrect webhook payload.");
+		}
+		return pubSubMessagePublish.publishMessages(requestBody);
+	}
+
+
 	@GetMapping({"/testing"})
 	public ResponseEntity<String> test () throws JsonMappingException, JsonProcessingException {
 		String message = "{\r\n"
@@ -76,8 +97,8 @@ public class BrandfolderController {
 				+ "    \"webhook_id\": \"c968e2e3-f341-4f9e-ac79-d54d689df994\"\r\n"
 				+ "  }\r\n"
 				+ "}";
-		 ObjectMapper objectMapper = new ObjectMapper();
-		 WebHook webHookData = objectMapper.readValue(message, WebHook.class);
+		ObjectMapper objectMapper = new ObjectMapper();
+		WebHook webHookData = objectMapper.readValue(message, WebHook.class);
 		logger.info("webHook id {} asset {}",webHookData.data().webhookId(),webHookData.data().attributes().bfKey());
 		return ResponseEntity.ok("HI ");
 	}

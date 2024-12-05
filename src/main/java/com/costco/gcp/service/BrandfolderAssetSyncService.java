@@ -1,4 +1,4 @@
-package com.costco.gcp.pubsub.service;
+package com.costco.gcp.service;
 
 import java.util.Collection;
 

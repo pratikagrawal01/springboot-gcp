@@ -1,9 +1,9 @@
-package com.costco.gcp.pubsub.listener;
+package com.costco.gcp.pubsub.service;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public interface PubSubMessageListener{
+public interface PubSubMessageListenerService{
 
 	public void pullMessages();
 

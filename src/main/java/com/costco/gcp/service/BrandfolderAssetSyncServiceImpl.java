@@ -1,4 +1,4 @@
-package com.costco.gcp.pubsub.service;
+package com.costco.gcp.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +18,6 @@ import org.springframework.stereotype.Service;
 import com.costco.gcp.constants.CommonConstants;
 import com.costco.gcp.model.AssetData;
 import com.costco.gcp.model.webhook.WebHook;
-import com.costco.gcp.service.BrandfolderService;
-import com.costco.gcp.service.GcpApiService;
-import com.costco.gcp.service.GcpFileStorageService;
-import com.costco.gcp.service.GcpSpannerService;
 import com.costco.gcp.util.BrandfolderUtil;
 import com.costco.gcp.util.CommonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
