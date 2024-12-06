@@ -180,6 +180,7 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 		return siteItemList;
 	}
 
+	//removes asset for updates which are marked for delete
 	public void discardDeletedAssets(Collection<AcknowledgeablePubsubMessage> messages){
 		Set<String> discardableEvents=new HashSet<String>();
 		if(eventMap.get(EVENT_WEBHOOK_DELETE)!=null) {

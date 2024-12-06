@@ -20,6 +20,9 @@ public class PubSubMessageListenerServiceImpl implements PubSubMessageListenerSe
 
 	@Value("${spring.cloud.gcp.pubsub.subscription-name}")
 	private String pubsubSubscription;
+	
+	@Value("${pubsub.process.message.limit}")
+	private Integer messageProcessLimit;
 
 	@Autowired
 	private PubSubTemplate pubSubTemplate;
@@ -29,37 +32,9 @@ public class PubSubMessageListenerServiceImpl implements PubSubMessageListenerSe
 
 	// Method to pull messages from Pub/Sub
 	public void pullMessages() {
-		Collection<AcknowledgeablePubsubMessage> messages = pubSubTemplate.pull(pubsubSubscription, 10, true); 
-		logger.info("total message receive: {}",messages.size());
+		Collection<AcknowledgeablePubsubMessage> messages = pubSubTemplate.pull(pubsubSubscription, messageProcessLimit, true); 
+		logger.info("total pub/sub message received for processing: {}",messages.size());
 		brandfolderAssetSyncService.processMessages(messages);
 	}
 
 }
-
-
-/*
-	@Bean
-	public PubSubInboundChannelAdapter messageChannelAdapter(
-			@Qualifier("pubsubInputChannel") MessageChannel inputChannel, PubSubTemplate pubSubTemplate) {
-		PubSubInboundChannelAdapter adapter = new PubSubInboundChannelAdapter(pubSubTemplate, pubsubSubscription);
-		adapter.setOutputChannel(inputChannel);
-		adapter.setAckMode(AckMode.MANUAL);
-		return adapter;
-	}
-
-	@Bean
-	public MessageChannel pubsubInputChannel() {
-		return new DirectChannel();
-	}
-
-	@Bean
-	@ServiceActivator(inputChannel = "pubsubInputChannel")
-	public MessageHandler messageReceiver() {
-		return message -> {
-			logger.info("Message arrived! Payload: " + new String((byte[]) message.getPayload()));
-			BasicAcknowledgeablePubsubMessage originalMessage =
-					message.getHeaders().get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class);
-			originalMessage.ack();
-		};
-	}
-}*/

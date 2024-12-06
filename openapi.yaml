@@ -1,0 +1,85 @@
+swagger: "2.0"
+info:
+  title: Example API with Custom DNS
+  description: API setup with a custom domain name.
+  version: 1.0.0
+host: brandfolder.endpoints.primordial-veld-442819-k2.cloud.goog
+schemes:
+  - https
+paths:
+  /pubsub/publish:
+    post:
+      summary: Publish a message to Pub/Sub and return a confirmation
+      operationId: publishMessage
+      consumes:
+        - text/plain
+      parameters:
+        - in: body
+          name: message
+          description: Message to be published to Pub/Sub
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message successfully published
+          schema:
+            type: string
+            example: "Message successfully published"
+        '400':
+          description: Invalid input, request body is empty or not a valid string
+        '500':
+          description: Internal server error
+  /item/{site_itemNumber}:
+    get:
+      summary: Get item details
+      description: Retrieves item details based on site and item number.
+      operationId: getItemDetails
+      parameters:
+        - name: site_itemNumber
+          in: path
+          description: The site and item number in the format "site:itemNumber"
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful response with item details.
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+        "400":
+          description: Invalid site_itemNumber format.
+        "404":
+          description: Item not found.
+        "500":
+          description: Internal Server Error
+  /product/{site_productNumber}:
+    get:
+      summary: Get Product details
+      description: Retrieves item details based on site and item number.
+      operationId: getProductDetails
+      parameters:
+        - name: site_productNumber
+          in: path
+          description: The site and product number in the format "site:productNumber"
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful response with Product details.
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+        "400":
+          description: Invalid site_productNumber format.
+        "404":
+          description: Product not found.
+        "500":
+          description: Internal Server Error
+x-google-endpoints:
+    - name: "brandfolder.endpoints.primordial-veld-442819-k2.cloud.goog"
+      target: "104.198.240.254"
