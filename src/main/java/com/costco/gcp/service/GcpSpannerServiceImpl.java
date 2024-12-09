@@ -43,6 +43,14 @@ public class GcpSpannerServiceImpl implements GcpSpannerService,CommonConstants{
 	}
 	
 	@Override
+	public void deleteAsset(String assetKey) {
+		if (logger.isDebugEnabled())
+			logger.debug("Deleting data from spanner: {}", assetKey);
+		
+		assetRepository.deleteById(assetKey);
+	}
+	
+	@Override
 	public Optional<AssetData> fetchAsset(String assetKey) {
 		if (logger.isDebugEnabled())
 			logger.debug("Fetching data from spanner: {}", assetKey);

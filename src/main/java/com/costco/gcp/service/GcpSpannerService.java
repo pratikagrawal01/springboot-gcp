@@ -12,4 +12,6 @@ public interface GcpSpannerService{
 
 	public Optional<AssetData> fetchAsset(String assetKey);
 
+	public void deleteAsset(String assetKey);
+
 }

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public interface GcpApiService {
 	
-	public JsonNode getItemData(String site_itemNumber);
-	
-	public JsonNode getProductData(String site_productNumber);
+	public JsonNode getGCPItemProductData(String site_productNumber,String folderDirectory);
 	
 }

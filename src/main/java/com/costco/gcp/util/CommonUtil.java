@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.costco.gcp.constants.CommonConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,7 +62,7 @@ public class CommonUtil {
             for (int j = 0; j < array2.size(); j++) {
                 String element2 = array2.get(j).getAsString();
                //  Combine the two elements into a string
-                permutations.add(element1 + "_"+ element2);
+                permutations.add(element1 + CommonConstants.PATH_VALUE_SEPERATOR + element2);
             }
         }
         return permutations;

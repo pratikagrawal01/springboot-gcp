@@ -29,33 +29,21 @@ public class GcpApiServiceImpl implements GcpApiService,CommonConstants{
 	private String gcpBucket;
 
 	@Override
-	public JsonNode getItemData(String site_itemNumber) {
-		String fileName="Item/"+site_itemNumber + GCP_FILETYPE;
-		JsonNode itemData=gcpFileStorageService.getJsonDataFromGcs(fileName);
+	public JsonNode getGCPItemProductData(String site_itemproductNumber,String folderDirectory) {
+		String fileName = folderDirectory + site_itemproductNumber + GCP_FILETYPE;
+		JsonNode itemData = gcpFileStorageService.getJsonDataFromGcs(fileName);
 		if (itemData == null) {
-			logger.error("File {} not found in GCS.",site_itemNumber);
-			JsonNode bfResponse=brandfolderService.getItemNumberResponse(site_itemNumber);
-			try {
-				gcpFileStorageService.uploadFile(bfResponse,site_itemNumber,"Item/");
-				logger.info("Uploded file {} to GCS.",site_itemNumber);
-			} catch (IOException e) {
-				logger.error("Could not upload the file {} to GCP. {} : ",fileName,e);
+			logger.error("File {} not found in GCS.",site_itemproductNumber);
+			JsonNode bfResponse=(GCP_PRODUCT_DIRECTORY.equals(folderDirectory)?
+					brandfolderService.getProductNumberResponse(site_itemproductNumber):
+						brandfolderService.getItemNumberResponse(site_itemproductNumber));
+			if(bfResponse==null) {
+				logger.error("No BF data found for item: {}",site_itemproductNumber);
+				return null;
 			}
-			return bfResponse;
-		}
-		return itemData;
-	}
-	
-	@Override
-	public JsonNode getProductData(String site_productNumber) {
-		String fileName="Product/"+site_productNumber + GCP_FILETYPE;
-		JsonNode itemData=gcpFileStorageService.getJsonDataFromGcs(fileName);
-		if (itemData == null) {
-			logger.error("File {} not found in GCS.",site_productNumber);
-			JsonNode bfResponse=brandfolderService.getProductNumberResponse(site_productNumber);
 			try {
-				gcpFileStorageService.uploadFile(bfResponse,site_productNumber,"Product/");
-				logger.info("Uploded file {} to GCS.",site_productNumber);
+				gcpFileStorageService.uploadFile(bfResponse,site_itemproductNumber,folderDirectory);
+				logger.info("Uploded file {} to GCS.",fileName);
 			} catch (IOException e) {
 				logger.error("Could not upload the file {} to GCP. {} : ",fileName,e);
 			}

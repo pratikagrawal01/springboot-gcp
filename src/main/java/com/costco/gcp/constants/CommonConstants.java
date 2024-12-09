@@ -39,6 +39,11 @@ public interface CommonConstants {
 	public static final String BF_PRODUCTID = "ProductID";
 	public static final String BF_BUSINESSUNIT = "BusinessUnit";
 	
+	public static final String GCP_ITEM_DIRECTORY = "Item/";
+	public static final String GCP_PRODUCT_DIRECTORY = "Product/";
+	
+	
+	
 	public static final String GCP_FILETYPE=".json";
 	
 	public static final String EVENT_WEBHOOK_UPDATE = "asset.update";

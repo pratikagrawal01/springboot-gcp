@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.costco.gcp.constants.CommonConstants;
 import com.costco.gcp.model.webhook.WebHook;
 import com.costco.gcp.pubsub.service.PubSubMessageListenerService;
 import com.costco.gcp.pubsub.service.PubSubMessagePublish;
@@ -48,12 +49,12 @@ public class BrandfolderController {
 
 	@GetMapping({ "/item/{site_itemNumber}"}) 
 	public JsonNode getItemNumberResponse(@PathVariable String site_itemNumber) {
-		return gcpApiService.getItemData(site_itemNumber);
+		return gcpApiService.getGCPItemProductData(site_itemNumber,CommonConstants.GCP_ITEM_DIRECTORY);
 	}
 
 	@GetMapping({ "/product/{site_productNumber}"}) 
 	public JsonNode getProductNumberResponse(@PathVariable String site_productNumber) {
-		return gcpApiService.getProductData(site_productNumber);
+		return gcpApiService.getGCPItemProductData(site_productNumber,CommonConstants.GCP_PRODUCT_DIRECTORY);
 	}
 
 	@GetMapping({ "/pubsub/process"}) 

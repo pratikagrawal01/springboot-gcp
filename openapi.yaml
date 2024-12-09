@@ -11,25 +11,34 @@ paths:
     post:
       summary: Publish a message to Pub/Sub and return a confirmation
       operationId: publishMessage
-      consumes:
-        - text/plain
-      parameters:
-        - in: body
-          name: message
-          description: Message to be published to Pub/Sub
-          required: true
-          schema:
-            type: string
       responses:
-        '200':
+        "200":
           description: Message successfully published
           schema:
             type: string
-            example: "Message successfully published"
-        '400':
-          description: Invalid input, request body is empty or not a valid string
-        '500':
+            example: "Message successfully published"        
+        "400":
+          description: Publishing failed.
+        "404":
+          description: Publishing failed
+        "500":
           description: Internal server error
+  /pubsub/process:
+    get:
+      summary: Get item details
+      description: Retrieves item details based on site and item number.
+      operationId: webhookListner      
+      responses:
+        "200":
+          description: Successful response with item details.
+          schema:
+            type: string
+        "400":
+          description: Message Processing Failed.
+        "404":
+          description: Message Processing Failed.
+        "500":
+          description: Internal Server Error
   /item/{site_itemNumber}:
     get:
       summary: Get item details

@@ -50,6 +50,7 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 	Map<String,Map<String,String>> eventMap = new HashMap<String,Map<String,String>>();
 
 	public void processMessages(Collection<AcknowledgeablePubsubMessage> messages) {
+		/* Consolidates the unique events and populates the map with the different event types*/
 		for (AcknowledgeablePubsubMessage message : messages) {
 			try {
 				String pubsubMsg= message.getPubsubMessage().getData().toStringUtf8();
@@ -70,8 +71,12 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 				logger.error("Error parsing pub/sub message: {}",e);
 			}
 		}
+		/* Removes all updates/insert events if there is a delete present */
 		discardDeletedAssets(messages);
+		/* Updates cloud spanner and File storage*/
 		syncDBAndBlob(messages);
+		/* Acknowledge processed message */
+		acknowledgeProcessedEvents(messages);
 	}
 
 
@@ -92,6 +97,63 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 		}
 	}
 
+
+	public void acknowledgeProcessedEvents(Collection<AcknowledgeablePubsubMessage> messages) {
+		Set<String> acknowledgableEvents=new HashSet<String>();
+		for (Map.Entry<String,Map<String,String>> events : eventMap.entrySet()) {
+			logger.debug("Total messages received for {} is {}",events.getKey(),events.getValue().size());
+			acknowledgableEvents=events.getValue().values().stream().collect(Collectors.toSet());
+		}
+		if(acknowledgableEvents==null || acknowledgableEvents.size()==0)
+			return;
+		logger.info("Total messages to acknowledge: {}",acknowledgableEvents.size());
+		for (AcknowledgeablePubsubMessage message : messages) {
+			if(acknowledgableEvents.contains(message.getAckId())) {
+				message.ack();
+				logger.info("Acknowledged : {} ",message.getAckId());
+			}
+		}
+	}
+
+	public void syncDeleteEvents(Map<String,String> eventDataMap,String eventtype) {
+		for (Map.Entry<String,String> entry : eventDataMap.entrySet()) {
+			try {
+				List<String> siteItemList,siteProductList;
+				String assetKey=entry.getKey();
+				AssetData assetData = gcpSpannerService.fetchAsset(assetKey).orElse(new AssetData());
+				logger.info("Data from spanner: {}",assetData.getAssetId());
+				if(assetData.getSite()!=null && assetData.getSite().has(BF_BUSINESSUNIT)) {
+					if(assetData.getItemNumber()!=null && assetData.getItemNumber().has(BF_ITEMNUMBERS)) {
+						siteItemList = CommonUtil.generateStringPermutation(
+								assetData.getSite().get(BF_BUSINESSUNIT).getAsJsonArray(),
+								assetData.getItemNumber().get(BF_ITEMNUMBERS).getAsJsonArray());
+						deleteAssetDataFromGCPFileStorage(siteItemList,assetKey,GCP_ITEM_DIRECTORY);
+					}		
+					if(assetData.getProductnumber()!=null && assetData.getProductnumber().has(BF_PRODUCTID)) {
+						siteProductList = CommonUtil.generateStringPermutation(
+								assetData.getSite().get(BF_BUSINESSUNIT).getAsJsonArray(),
+								assetData.getProductnumber().get(BF_PRODUCTID).getAsJsonArray());
+						deleteAssetDataFromGCPFileStorage(siteProductList,assetKey,GCP_PRODUCT_DIRECTORY);
+					}
+				}				
+
+			}catch(Exception ex) {
+				eventMap.get(eventtype).entrySet().removeIf(k -> k.getValue().equals(entry.getValue()));
+			}
+		}
+	}
+
+
+	public void deleteAssetDataFromGCPFileStorage(List<String> siteItemList,String assetKey,String itemTypeStorageDirectory) throws IOException {
+		for(String filename: siteItemList) {
+			JsonNode gcpFileData = gcpApiService.getGCPItemProductData(filename,itemTypeStorageDirectory);
+			gcpFileData=deleteAssetJsonNode(gcpFileData,assetKey);
+			if(gcpFileData!=null)
+				gcpFileStorageService.uploadFile(gcpFileData, filename, itemTypeStorageDirectory);
+			gcpSpannerService.deleteAsset(assetKey);
+		}
+	}
+
 	public void syncUpdateEvents(Map<String,String> eventDataMap,String eventtype) {
 		for (Map.Entry<String,String> entry : eventDataMap.entrySet()) {
 			try {
@@ -105,31 +167,35 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 				List<String> siteItemList = getAssetMetaData(bfDataMap,assetKey,BF_ITEMNUMBERS);
 				List<String> siteProductList = getAssetMetaData(bfDataMap,assetKey,BF_PRODUCTID);
 				consolidateOldAndNewItemData(siteItemList,siteProductList,assetData);
-				updateGCPFileStorage(siteItemList,bfDataMap,assetKey);
+				updateGCPFileStorage(siteItemList,bfDataMap,assetKey,GCP_ITEM_DIRECTORY);
+				updateGCPFileStorage(siteProductList,bfDataMap,assetKey,GCP_PRODUCT_DIRECTORY);
+				gcpSpannerService.insertItemAssetData(bfDataMap);
 			}catch(Exception ex) {
 				eventMap.get(eventtype).entrySet().removeIf(k -> k.getValue().equals(entry.getValue()));
 			}
 		}
 	}
 
-	public void updateGCPFileStorage(List<String> siteItemList,Map<String,Map<String,JsonObject>> bfDataMap,String assetKey) throws IOException {
+	public void updateGCPFileStorage(List<String> siteItemList,Map<String,Map<String,JsonObject>> bfDataMap,String assetKey,String itemTypeStorageDirectory) throws IOException {
 		JsonObject assetMetaData = bfDataMap.get(assetKey).get(BF_DATA);
 		for(String filename: siteItemList) {
-			JsonNode gcpFileData = gcpApiService.getItemData(filename);
-			gcpFileData=replaceAssetJsonNode(gcpFileData,assetMetaData,assetKey);
-			if(gcpFileData!=null)
-				gcpFileStorageService.uploadFile(gcpFileData, filename, "Item/");
+			JsonNode gcpFileData = gcpApiService.getGCPItemProductData(filename,itemTypeStorageDirectory);
+			if(gcpFileData!=null) {
+				gcpFileData=replaceAssetJsonNode(gcpFileData,assetMetaData,assetKey);
+				logger.info("Replaced json Data = {}",gcpFileData);
+				gcpFileStorageService.uploadFile(gcpFileData, filename, itemTypeStorageDirectory);
+			}
 		}
 	}
 
 
-	public JsonNode replaceAssetJsonNode(JsonNode gcpFileData,JsonObject assetData,String assetKey) {
+	public JsonNode deleteAssetJsonNode(JsonNode gcpFileData,String assetKey) {
 		JsonObject tempJson = CommonUtil.convertJsonNodetoJsonObject(gcpFileData);
 		if (tempJson != null && tempJson.has(BF_DATA) && tempJson.getAsJsonArray(BF_DATA).size() > 0) {
 			for (int i = 0; i < tempJson.getAsJsonArray(BF_DATA).size(); i++) {
 				JsonObject data = tempJson.getAsJsonArray(BF_DATA).get(i).getAsJsonObject();
 				if(data.get(BF_ID).getAsString().equals(assetKey)) {
-					tempJson.getAsJsonArray(BF_DATA).set(i, assetData);
+					tempJson.getAsJsonArray(BF_DATA).remove(i);
 					return CommonUtil.convertJsonObjecttoJsonNode(tempJson);
 				}
 			}
@@ -137,6 +203,20 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 		return null;
 	}
 
+	public JsonNode replaceAssetJsonNode(JsonNode gcpFileData,JsonObject assetData,String assetKey) {
+		JsonObject tempJson = CommonUtil.convertJsonNodetoJsonObject(gcpFileData);
+		if (tempJson != null && tempJson.has(BF_DATA) && tempJson.getAsJsonArray(BF_DATA).size() > 0) {
+			for (int i = 0; i < tempJson.getAsJsonArray(BF_DATA).size(); i++) {
+				JsonObject data = tempJson.getAsJsonArray(BF_DATA).get(i).getAsJsonObject();
+				if(data.get(BF_ID).getAsString().equals(assetKey)) {
+					logger.info("Matched assetID {} in GCP for file:",assetKey);
+					tempJson.getAsJsonArray(BF_DATA).set(i, assetData);
+					return CommonUtil.convertJsonObjecttoJsonNode(tempJson);
+				}
+			}
+		}
+		return null;
+	}
 
 
 	public void consolidateOldAndNewItemData(List<String> siteItemList,List<String> siteProductList,AssetData assetData) {

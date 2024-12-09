@@ -48,6 +48,8 @@ public class BrandfolderServiceImpl implements BrandfolderService,CommonConstant
 			String[] params = site_itemNumber.split(PATH_VALUE_SEPERATOR, 2);
 			String url = StringUtils.replaceEach(bfItemSearchUrl, BRANDFOLDER_ITEM_SEARCH_PARAM, params);
 			JsonNode bfResponse = brandfolderUtil.prettifyBfResponse(brandFolderClient.makeBFApiCal(url));
+			if(bfResponse==null)
+				return null;
 			bfResponse=getAttachmentData(bfResponse);
 			if(updateDB)
 				gcpSpannerService.insertItemAssetData(brandfolderUtil.getBfCustomFields(bfResponse));
