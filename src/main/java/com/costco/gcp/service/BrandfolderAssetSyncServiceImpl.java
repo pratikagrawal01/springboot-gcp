@@ -178,12 +178,17 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 
 	public void updateGCPFileStorage(List<String> siteItemList,Map<String,Map<String,JsonObject>> bfDataMap,String assetKey,String itemTypeStorageDirectory) throws IOException {
 		JsonObject assetMetaData = bfDataMap.get(assetKey).get(BF_DATA);
+		logger.info("assetKey {},siteItemList = {}",assetKey,String.join(",", siteItemList));
 		for(String filename: siteItemList) {
-			JsonNode gcpFileData = gcpApiService.getGCPItemProductData(filename,itemTypeStorageDirectory);
+			String gcp_file_path= itemTypeStorageDirectory+filename+GCP_FILETYPE;
+			JsonNode gcpFileData = gcpFileStorageService.getJsonDataFromGcs(gcp_file_path);
 			if(gcpFileData!=null) {
 				gcpFileData=replaceAssetJsonNode(gcpFileData,assetMetaData,assetKey);
-				logger.info("Replaced json Data = {}",gcpFileData);
+				if(logger.isDebugEnabled())
+					logger.debug("Replaced json Data = {}",gcpFileData);
 				gcpFileStorageService.uploadFile(gcpFileData, filename, itemTypeStorageDirectory);
+			}else {
+				gcpApiService.getGCPItemProductData(filename,itemTypeStorageDirectory);
 			}
 		}
 	}
@@ -257,7 +262,7 @@ public class BrandfolderAssetSyncServiceImpl implements BrandfolderAssetSyncServ
 		if(logger.isDebugEnabled()) 
 			logger.debug("BF Asset Size of {} is {}, ItemList={} ",itemType,siteItemList.size(),siteItemList);
 
-		return siteItemList;
+		return siteItemList.stream().distinct().collect(Collectors.toList());
 	}
 
 	//removes asset for updates which are marked for delete

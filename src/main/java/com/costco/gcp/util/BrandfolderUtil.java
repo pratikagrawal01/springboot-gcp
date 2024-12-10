@@ -96,7 +96,7 @@ public class BrandfolderUtil implements CommonConstants {
 
 				JsonObject productJson=new JsonObject();
 				productJson.add(BF_PRODUCTID,productNumbers);
-				
+
 				JsonObject businessUnitJson=new JsonObject();
 				businessUnitJson.add(BF_BUSINESSUNIT,businessUnit);
 
@@ -111,45 +111,34 @@ public class BrandfolderUtil implements CommonConstants {
 		return bfAssetData;
 	}
 
-	// public Map<String, Map<String, JsonObject>> getItemNumberList(JsonObject jsonObject) {
-	//     Map<String, Map<String, JsonObject>> bfAssetData = new HashMap<String, Map<String, JsonObject>>();
-	//     int jsonDataArrayCount = jsonObject.getAsJsonArray(BF_DATA).size();
+	public String getHeroImage(JsonNode jsonNode) {
+		if(jsonNode!=null && jsonNode.has(BF_DATA) && jsonNode.get(BF_DATA).size()>0) {					
+			for (int i = 0; i < jsonNode.get(BF_DATA).size(); i++) {
+				JsonNode data = jsonNode.get(BF_DATA).get(i);
+				if(data.has(BF_RELATIONSHIPS) && data.get(BF_RELATIONSHIPS).has(BF_CUSTOM_FIELD_VALUES)
+						&& data.get(BF_RELATIONSHIPS).get(BF_CUSTOM_FIELD_VALUES).has(BF_DATA)
+						&& data.get(BF_RELATIONSHIPS).get(BF_CUSTOM_FIELD_VALUES).get(BF_DATA).size()>0) {
 
-	//     for (int i = 0; i < jsonDataArrayCount; i++) {
-	//         JsonObject data = jsonObject.getAsJsonArray(BF_DATA).get(i).getAsJsonObject();
-	//         JsonArray itemNumbers = new JsonArray();
-	//         JsonArray productNumbers = new JsonArray();
+					int iCustomFieldCount=data.get(BF_RELATIONSHIPS).get(BF_CUSTOM_FIELD_VALUES).get(BF_DATA).size();
+					for (int cCount = 0; cCount < iCustomFieldCount; cCount++) {
+						JsonNode customDataJson = data.get(BF_RELATIONSHIPS).get(BF_CUSTOM_FIELD_VALUES).get(BF_DATA).get(cCount);
+						if(customDataJson.get(BF_KEY).asText().equals(BF_PRIORITY)) {
+							String priorityValue=customDataJson.get(BF_VALUE).asText();
+							try {
+								int intPriority=Integer.parseInt(priorityValue);
+								if(intPriority==1)
+									return data.get(BF_ATTRIBUTES).get(BF_CDN_URL).asText();
+							} catch (NumberFormatException e) {
+								if(logger.isDebugEnabled())
+									logger.debug("Priorty {} , not set right. Value = {}",priorityValue);
+							}
+						}
 
-	//         Map<String, JsonObject> tempData = new HashMap<String, JsonObject>();
+					}
+				}
+			}
 
-	//         if (data.has(BF_RELATIONSHIPS) && data.getAsJsonObject(BF_RELATIONSHIPS).has(BF_CUSTOM_FIELD_VALUES)
-	//                 && data.getAsJsonObject(BF_RELATIONSHIPS).getAsJsonObject(BF_CUSTOM_FIELD_VALUES).has(BF_DATA)
-	//                 && data.getAsJsonObject(BF_RELATIONSHIPS).getAsJsonObject(BF_CUSTOM_FIELD_VALUES).getAsJsonArray(BF_DATA).size() > 0) {
-
-	//             int iCustomFieldCount = data.getAsJsonObject(BF_RELATIONSHIPS).getAsJsonObject(BF_CUSTOM_FIELD_VALUES).getAsJsonArray(BF_DATA).size();
-	//             for (int cCount = 0; cCount < iCustomFieldCount; cCount++) {
-	//                 JsonObject customDataJson = data.getAsJsonObject(BF_RELATIONSHIPS).getAsJsonObject(BF_CUSTOM_FIELD_VALUES).getAsJsonArray(BF_DATA).get(cCount).getAsJsonObject();
-	//                 if (customDataJson.get(BF_KEY).getAsString().equals(BF_ITEMNUMBERS)) {
-	//                     itemNumbers.add(customDataJson.get(BF_VALUE).getAsString()); 
-	//                 }else if (customDataJson.get(BF_KEY).getAsString().equals(BF_PRODUCTID)) {
-	//                     productNumbers.add(customDataJson.get(BF_VALUE).getAsString());
-	//                 }
-	//             }
-	//             JsonObject itemJson = new JsonObject();
-	//             itemJson.add(BF_ITEMNUMBERS, itemNumbers);
-
-	//             JsonObject productJson = new JsonObject();
-	//             productJson.add(BF_PRODUCTID, productNumbers);
-
-	//             tempData.put(BF_DATA, JsonParser.parseString(data.toString()).getAsJsonObject());
-	//             tempData.put(BF_ITEMNUMBERS, itemJson);
-	//             tempData.put(BF_PRODUCTID, productJson);
-	//             bfAssetData.put(data.get(BF_ID).getAsString(), tempData);
-	//         }
-	//     }
-
-	//     return bfAssetData;
-
-	// }
-
+		}
+		return null;
+	}
 }

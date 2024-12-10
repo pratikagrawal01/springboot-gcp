@@ -40,11 +40,6 @@ public class GcpFileStorageServiceImpl implements GcpFileStorageService,CommonCo
 	    
 	    BlobId blobId = BlobId.of(gcpBucket, folderpath + filename + GCP_FILETYPE);
 	    BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-    	Blob blob = storage.get(blobId);
-    	if (blob != null) {
-	    	storage.delete(blobId);
-	    	logger.info("File deleted {}",folderpath + filename);
-    	}
     	storage.create(blobInfo, Files.readAllBytes(filePath));
 	    logger.info("File Uploaded to {}",folderpath + filename);
 	    Files.delete(filePath);

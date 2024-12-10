@@ -56,13 +56,34 @@ public class BrandfolderController {
 	public JsonNode getProductNumberResponse(@PathVariable String site_productNumber) {
 		return gcpApiService.getGCPItemProductData(site_productNumber,CommonConstants.GCP_PRODUCT_DIRECTORY);
 	}
+	
+	@GetMapping({ "/hero/product/{site_productNumber}"}) 
+	public ResponseEntity<byte[]>  getProductHeroImage(@PathVariable String site_productNumber) {
+		try {
+			return gcpApiService.getHeroImage(site_productNumber,CommonConstants.GCP_PRODUCT_DIRECTORY);
+		} catch (Exception e) {
+			logger.error("Error Fetching hero image {}, {}",site_productNumber,e);
+			return null;
+		}
+	}
+	
+	@GetMapping({ "/hero/item/{site_itemNumber}"}) 
+	public ResponseEntity<byte[]> getItemHeroImage(@PathVariable String site_itemNumber) {
+		try {
+			return gcpApiService.getHeroImage(site_itemNumber,CommonConstants.GCP_ITEM_DIRECTORY);
+		} catch (Exception e) {
+			logger.error("Error Fetching hero image {} , {} ",site_itemNumber,e);
+			return null;
+		}
+	}
+
 
 	@GetMapping({ "/pubsub/process"}) 
 	public ResponseEntity<String> webhookListner() {
 		try {
 			pubSubMessageService.pullMessages();
 		} catch (Exception e) {
-			logger.info("Error on message polling {}",e);
+			logger.error("Error on message polling {}",e);
 			return ResponseEntity.internalServerError().body("Message polling failed.");
 		}
 		return ResponseEntity.ok("Message received");
